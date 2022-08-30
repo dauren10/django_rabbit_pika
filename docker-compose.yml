@@ -1,0 +1,41 @@
+version: '3.9'
+services:      
+    web:
+        build: .
+        restart: always
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+        - .:/code
+        ports:
+        - "8000:8000"
+    rabbitmq:
+        image: "rabbitmq:3-management"
+        restart: always
+        ports:
+            - 5672:5672
+            - 15672:15672
+        expose:
+            - 15672
+            - 5672
+        volumes:
+            - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+            - ~/.docker-conf/rabbitmq/log/:/home/log/rabbitmq
+        networks:
+            - rabbitmq_go_net
+    flower:
+      image: mher/flower:0.9.7
+      restart: unless-stopped
+      command: ["flower", "--address=0.0.0.0", "--broker=amqp://guest:guest@172.17.0.1:5672/%2F","--port=5555", "--logging=DEBUG"]  
+      depends_on:
+        - rabbitmq
+      ports:
+        - 5555:5555
+    worker:
+        build:
+            context: .
+        restart: always
+        command: celery -A core worker -l info 
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge

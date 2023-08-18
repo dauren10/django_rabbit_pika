@@ -10,15 +10,26 @@ services:
         - "8000:8000"
         depends_on:
         - rabbitmq_t
+    cond:
+        image: django_rabbit_pika-web_t
+        restart: always
+        command: >
+            bash -c "python ./manage.py cond"
+        volumes:
+        - .:/code
+        ports:
+        - "8001:8000"
+        depends_on:
+        - rabbitmq_t
     rabbitmq_t:
         image: "rabbitmq:3-management"
         restart: always
         ports:
-            - 5673:5672
-            - 15673:15672
+            - 5672:5672
+            - 15672:15672
         expose:
-            - 15673
-            - 5673
+            - 15672
+            - 5672
         volumes:
             - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
             - ~/.docker-conf/rabbitmq/log/:/home/log/rabbitmq

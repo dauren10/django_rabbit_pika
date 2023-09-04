@@ -1,0 +1,1 @@
+sudo docker compose restart for apply changes in task

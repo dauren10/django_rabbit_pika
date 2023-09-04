@@ -35,6 +35,11 @@ services:
             - ~/.docker-conf/rabbitmq/log/:/home/log/rabbitmq
         networks:
             - rabbitmq_go_net
+    worker:
+        build:
+            context: .
+        restart: always
+        command: celery -A core worker -l info
 
 
 networks:
